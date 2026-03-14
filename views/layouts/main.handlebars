@@ -61,10 +61,13 @@
   <!-- 管理员页面导航 -->
   {{#if is_admin}}
   <div class="bg-gray-800 text-white shadow-md">
-    <div class="container mx-auto px-4 py-2 flex items-center">
+    <div class="container mx-auto px-4 py-2 flex items-center justify-between">
       <a href="#" id="back-button" class="flex items-center text-white hover:text-gray-300 transition-colors">
         <i class="fa fa-arrow-left mr-2"></i>
         <span>返回上一级</span>
+      </a>
+      <a href="/admin/change-password" class="text-white hover:text-gray-300 transition-colors text-sm">
+        <i class="fa fa-lock mr-1"></i>修改密码
       </a>
     </div>
   </div>

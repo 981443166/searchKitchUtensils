@@ -35,6 +35,10 @@ router.get('/admin', authController.isAuthenticated, (req, res) => {
   res.render('admin/dashboard');
 });
 
+// 密码修改路由
+router.get('/admin/change-password', authController.isAuthenticated, authController.changePasswordForm);
+router.post('/admin/change-password', authController.isAuthenticated, authController.changePassword);
+
 // 物品管理路由
 router.get('/admin/items', authController.isAuthenticated, itemController.adminList);
 router.get('/admin/items/create', authController.isAuthenticated, itemController.createForm);
