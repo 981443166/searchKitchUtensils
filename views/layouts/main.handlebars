@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+  <!-- 导航栏 -->
+  <nav class="bg-blue-600 text-white shadow-md">
+    <div class="container mx-auto px-4 py-3">
+      <div class="flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold">丰厨汇厨具</a>
+        <!-- 桌面端菜单 -->
+        <div class="hidden md:flex space-x-4">
+          <a href="/" class="hover:text-blue-200 transition-colors">首页</a>
+          <a href="/categories" class="hover:text-blue-200 transition-colors">分类</a>
+          {{#if user}}
+          <a href="/admin" class="hover:text-blue-200 transition-colors">后台管理</a>
+          <a href="/logout" class="hover:text-blue-200 transition-colors">退出</a>
+          {{else}}
+          <a href="/login" class="hover:text-blue-200 transition-colors">登录</a>
+          {{/if}}
+        </div>
+        <!-- 移动端汉堡菜单按钮 -->
+        <div class="md:hidden">
+          <button id="mobile-menu-btn" class="focus:outline-none p-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" aria-label="打开菜单" aria-expanded="false">
+            <i class="fa fa-bars text-xl pointer-events-none"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- 移动端菜单（默认隐藏） -->
+      <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4 border-t border-blue-500 pt-4">
+        <div class="flex flex-col space-y-3">
+          <a href="/" class="hover:text-blue-200 transition-colors py-2 px-3 rounded-lg hover:bg-blue-700">首页</a>
+          <a href="/categories" class="hover:text-blue-200 transition-colors py-2 px-3 rounded-lg hover:bg-blue-700">分类</a>
+          {{#if user}}
+          <a href="/admin" class="hover:text-blue-200 transition-colors py-2 px-3 rounded-lg hover:bg-blue-700">后台管理</a>
+          <a href="/logout" class="hover:text-blue-200 transition-colors py-2 px-3 rounded-lg hover:bg-blue-700">退出</a>
+          {{else}}
+          <a href="/login" class="hover:text-blue-200 transition-colors py-2 px-3 rounded-lg hover:bg-blue-700">登录</a>
+          {{/if}}
+        </div>
+      </div>
+      
+      <!-- 搜索框 -->
+      <div class="mt-4">
+        <form action="/search" method="GET" class="flex">
+          <input type="text" name="q" placeholder="搜索厨具..." class="flex-1 px-4 py-2 rounded-l-md focus:outline-none text-gray-900">
+          <button type="submit" class="bg-blue-800 px-4 py-2 rounded-r-md hover:bg-blue-700 transition-colors">
+            <i class="fa fa-search"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 管理员页面导航 -->
+  {{#if is_admin}}
+  <div class="bg-gray-800 text-white shadow-md">
+    <div class="container mx-auto px-4 py-2 flex items-center">
+      <a href="#" id="back-button" class="flex items-center text-white hover:text-gray-300 transition-colors">
+        <i class="fa fa-arrow-left mr-2"></i>
+        <span>返回上一级</span>
+      </a>
+    </div>
+  </div>
+  {{/if}}
+
+  <!-- 主内容 -->
+  <main class="container mx-auto px-4 py-8">
+    {{{body}}}
+  </main>
+
+  <!-- 管理员工具脚本 -->
+  {{#if is_admin}}
+  <script src="/js/admin-util.js"></script>
+  {{/if}}
+
+  <!-- 移动端菜单JavaScript -->
+  <script>
+    (function() {
+      // 获取菜单按钮和菜单元素
+      const menuBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+      
+      if (!menuBtn || !mobileMenu) {
+        console.error('Mobile menu elements not found');
+        return;
+      }
+      
+      let isMenuOpen = false;
+      
+      // 切换菜单显示/隐藏
+      function toggleMenu(event) {
+        if (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        
+        isMenuOpen = !isMenuOpen;
+        
+        if (isMenuOpen) {
+          mobileMenu.classList.remove('hidden');
+          menuBtn.setAttribute('aria-expanded', 'true');
+          menuBtn.innerHTML = '<i class="fa fa-times text-xl pointer-events-none"></i>';
+        } else {
+          mobileMenu.classList.add('hidden');
+          menuBtn.setAttribute('aria-expanded', 'false');
+          menuBtn.innerHTML = '<i class="fa fa-bars text-xl pointer-events-none"></i>';
+        }
+      }
+      
+      // 关闭菜单
+      function closeMenu() {
+        if (isMenuOpen) {
+          isMenuOpen = false;
+          mobileMenu.classList.add('hidden');
+          menuBtn.setAttribute('aria-expanded', 'false');
+          menuBtn.innerHTML = '<i class="fa fa-bars text-xl pointer-events-none"></i>';
+        }
+      }
+      
+      // 绑定点击事件到菜单按钮
+      menuBtn.addEventListener('click', toggleMenu, { passive: false });
+      
+      // 点击页面其他区域关闭菜单
+      document.addEventListener('click', function(event) {
+        if (isMenuOpen && !mobileMenu.contains(event.target) && !menuBtn.contains(event.target)) {
+          closeMenu();
+        }
+      });
+      
+      // 点击菜单项后关闭菜单
+      const menuLinks = mobileMenu.querySelectorAll('a');
+      menuLinks.forEach(function(link) {
+        link.addEventListener('click', closeMenu);
+      });
+      
+      // 窗口大小改变时关闭菜单（切换到桌面视图）
+      window.addEventListener('resize', function() {
+        if (window.innerWidth >= 768) {
+          closeMenu();
+        }
+      });
+      
+      // ESC键关闭菜单
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && isMenuOpen) {
+          closeMenu();
+        }
+      });
+    })();
+  </script>
+
+</body>
+</html>

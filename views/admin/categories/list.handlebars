@@ -1,0 +1,33 @@
+<h1 class="text-3xl font-bold mb-6">分类管理</h1>
+<div class="bg-white rounded-lg shadow-md p-6">
+  <div class="mb-4 flex justify-between items-center">
+    <h2 class="text-xl font-semibold">分类列表</h2>
+    <a href="/admin/categories/create" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">创建分类</a>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名称</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        {{#each categories}}
+        <tr>
+          <td class="px-6 py-4 whitespace-nowrap">{{id}}</td>
+          <td class="px-6 py-4 whitespace-nowrap">{{name}}</td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <a href="/admin/categories/{{id}}/edit" class="text-blue-600 hover:text-blue-800 mr-2">编辑</a>
+            <form action="/admin/categories/{{id}}" method="POST" style="display: inline;">
+              <input type="hidden" name="_method" value="DELETE">
+              <button type="submit" class="text-red-600 hover:text-red-800" onclick="return confirm('确定要删除吗？');">删除</button>
+            </form>
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>

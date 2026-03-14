@@ -1,0 +1,55 @@
+{{#if item}}
+<h1 class="text-3xl font-bold mb-6">{{item.name}}</h1>
+<div class="bg-white rounded-lg shadow-md p-6">
+  <!-- 图片展示区域 -->
+  <div class="mb-6">
+    {{#if item.image_path}}
+    <div class="relative w-full max-w-2xl mx-auto">
+      <img src="{{item.image_path}}" 
+           alt="{{item.name}}" 
+           class="w-full h-auto max-h-96 object-contain rounded-lg shadow-sm"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <!-- 图片加载失败时显示 -->
+      <div class="hidden w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+        <div class="text-center">
+          <i class="fa fa-image text-4xl text-gray-400 mb-2"></i>
+          <p class="text-gray-500">图片加载失败</p>
+        </div>
+      </div>
+    </div>
+    {{else}}
+    <!-- 无图片时显示占位符 -->
+    <div class="w-full max-w-2xl mx-auto h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+      <div class="text-center">
+        <i class="fa fa-image text-4xl text-gray-400 mb-2"></i>
+        <p class="text-gray-500">暂无图片</p>
+      </div>
+    </div>
+    {{/if}}
+  </div>
+
+  <div class="mb-4">
+    <span class="text-gray-600">分类：</span>
+    <span class="text-gray-800">{{item.category_name}}</span>
+  </div>
+  {{#if item.specifications}}
+  <div class="mb-4">
+    <span class="text-gray-600">规格参数：</span>
+    <p class="text-gray-800 mt-2 leading-relaxed bg-gray-50 p-3 rounded-lg">{{item.specifications}}</p>
+  </div>
+  {{/if}}
+  <div class="mb-4">
+    <span class="text-gray-600">价格：</span>
+    <span class="text-gray-800 font-bold text-xl text-red-600">¥{{item.price}}</span>
+  </div>
+  <div class="mb-4">
+    <span class="text-gray-600">描述：</span>
+    <p class="text-gray-800 mt-2 leading-relaxed">{{item.description}}</p>
+  </div>
+  <div class="mt-6">
+    <a href="/items" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">返回列表</a>
+  </div>
+</div>
+{{else}}
+<p class="text-red-500">物品不存在</p>
+{{/if}}

@@ -1,0 +1,72 @@
+<h1 class="text-3xl font-bold mb-6">物品管理</h1>
+<div class="bg-white rounded-lg shadow-md p-6">
+  <div class="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+    <h2 class="text-xl font-semibold mb-2 sm:mb-0">物品列表</h2>
+    <div class="flex flex-wrap items-center gap-2">
+      <form action="/admin/items" method="GET" class="mb-2 sm:mb-0">
+        <input type="hidden" name="showDeleted" value="{{#if showDeleted}}1{{else}}0{{/if}}">
+        <div class="flex items-center">
+          <label for="sort" class="block text-sm font-medium text-gray-700 mr-2">排序方式：</label>
+          <select id="sort" name="sort" class="w-full sm:w-auto px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="default" {{#if (eq sort 'default')}}selected{{/if}}>默认排序</option>
+            <option value="price_asc" {{#if (eq sort 'price_asc')}}selected{{/if}}>价格从低到高</option>
+            <option value="price_desc" {{#if (eq sort 'price_desc')}}selected{{/if}}>价格从高到低</option>
+          </select>
+          <button type="submit" class="ml-2 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700">排序</button>
+        </div>
+      </form>
+      <div class="space-x-2">
+        {{#if showDeleted}}
+        <a href="/admin/items" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">隐藏已删除</a>
+        {{else}}
+        <a href="/admin/items?showDeleted=1" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">显示已删除</a>
+        {{/if}}
+        <a href="/admin/items/create" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">创建物品</a>
+      </div>
+    </div>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名称</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">分类</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">价格</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        {{#each items}}
+        <tr class="{{#if is_deleted}}bg-red-50{{/if}}">
+          <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{id}}</td>
+          <td class="px-4 py-4 whitespace-nowrap text-sm font-mono text-gray-600">{{#if sku}}{{sku}}{{else}}-{{/if}}</td>
+          <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{name}}</td>
+          <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{category_name}}</td>
+          <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">¥{{price}}</td>
+          <td class="px-4 py-4 whitespace-nowrap text-sm">
+            {{#if is_deleted}}
+            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">已删除</span>
+            {{else}}
+            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">正常</span>
+            {{/if}}
+          </td>
+          <td class="px-4 py-4 whitespace-nowrap text-sm">
+            {{#if is_deleted}}
+            <span class="text-gray-400">已删除</span>
+            {{else}}
+            <a href="/admin/items/{{id}}/edit" class="text-blue-600 hover:text-blue-800 mr-2">编辑</a>
+            <form action="/admin/items/{{id}}" method="POST" style="display: inline;">
+              <input type="hidden" name="_method" value="DELETE">
+              <button type="submit" class="text-red-600 hover:text-red-800" onclick="return confirm('确定要删除吗？删除后物品将标记为已删除状态。');">删除</button>
+            </form>
+            {{/if}}
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>
