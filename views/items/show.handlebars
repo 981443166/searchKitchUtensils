@@ -7,7 +7,8 @@
     <div class="relative w-full max-w-2xl mx-auto">
       <img src="{{item.image_path}}" 
            alt="{{item.name}}" 
-           class="w-full h-auto max-h-96 object-contain rounded-lg shadow-sm"
+           class="w-full h-auto max-h-96 object-contain rounded-lg shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
+           onclick="openImageModal('{{item.image_path}}')"
            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
       <!-- 图片加载失败时显示 -->
       <div class="hidden w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -50,6 +51,255 @@
     <a href="/items" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">返回列表</a>
   </div>
 </div>
+
+<!-- 图片放大模态框 -->
+<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center hidden">
+  <div class="relative w-full h-full flex items-center justify-center p-4">
+    <!-- 关闭按钮 -->
+    <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white text-2xl bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-70 transition-all z-10">
+      <i class="fa fa-times"></i>
+    </button>
+    
+    <!-- 左箭头 -->
+    <button onclick="navigateImages(-1)" class="absolute left-4 text-white text-2xl bg-black bg-opacity-50 rounded-full p-3 hover:bg-opacity-70 transition-all z-10">
+      <i class="fa fa-chevron-left"></i>
+    </button>
+    
+    <!-- 右箭头 -->
+    <button onclick="navigateImages(1)" class="absolute right-4 text-white text-2xl bg-black bg-opacity-50 rounded-full p-3 hover:bg-opacity-70 transition-all z-10">
+      <i class="fa fa-chevron-right"></i>
+    </button>
+    
+    <!-- 图片容器 -->
+    <div class="relative w-full max-w-6xl h-full flex items-center justify-center">
+      <img id="modalImage" src="" alt="放大图片" class="max-w-full max-h-full object-contain transition-transform duration-300">
+      <!-- 加载状态 -->
+      <div id="imageLoading" class="absolute inset-0 flex items-center justify-center">
+        <div class="text-white text-4xl">
+          <i class="fa fa-spinner fa-spin"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 图片数组（当前物品只有一张图片，可扩展为多张）
+  const images = ["{{item.image_path}}"];
+  let currentImageIndex = 0;
+  let scale = 1;
+  let startX = 0;
+  let startY = 0;
+  let translateX = 0;
+  let translateY = 0;
+  
+  // 打开图片模态框
+  function openImageModal(imageSrc) {
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const imageLoading = document.getElementById('imageLoading');
+    
+    // 重置缩放和位移
+    scale = 1;
+    translateX = 0;
+    translateY = 0;
+    updateImageTransform();
+    
+    // 显示加载状态
+    imageLoading.style.display = 'flex';
+    
+    // 设置图片源
+    modalImage.src = imageSrc;
+    
+    // 图片加载完成后隐藏加载状态
+    modalImage.onload = function() {
+      imageLoading.style.display = 'none';
+    };
+    
+    // 图片加载失败
+    modalImage.onerror = function() {
+      imageLoading.innerHTML = '<div class="text-white text-2xl"><i class="fa fa-exclamation-circle"></i> 图片加载失败</div>';
+    };
+    
+    // 显示模态框
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // 防止背景滚动
+  }
+  
+  // 关闭图片模态框
+  function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto'; // 恢复背景滚动
+  }
+  
+  // 导航图片
+  function navigateImages(direction) {
+    currentImageIndex += direction;
+    if (currentImageIndex < 0) {
+      currentImageIndex = images.length - 1;
+    } else if (currentImageIndex >= images.length) {
+      currentImageIndex = 0;
+    }
+    
+    const modalImage = document.getElementById('modalImage');
+    const imageLoading = document.getElementById('imageLoading');
+    
+    // 重置缩放和位移
+    scale = 1;
+    translateX = 0;
+    translateY = 0;
+    updateImageTransform();
+    
+    // 显示加载状态
+    imageLoading.style.display = 'flex';
+    
+    // 设置新图片
+    modalImage.src = images[currentImageIndex];
+  }
+  
+  // 更新图片变换
+  function updateImageTransform() {
+    const modalImage = document.getElementById('modalImage');
+    modalImage.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+  }
+  
+  // 鼠标事件 - 开始拖动
+  function startDrag(e) {
+    if (scale === 1) return; // 只有缩放后才能拖动
+    
+    startX = e.clientX - translateX;
+    startY = e.clientY - translateY;
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', endDrag);
+  }
+  
+  // 鼠标事件 - 拖动中
+  function drag(e) {
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    updateImageTransform();
+  }
+  
+  // 鼠标事件 - 结束拖动
+  function endDrag() {
+    document.removeEventListener('mousemove', drag);
+    document.removeEventListener('mouseup', endDrag);
+  }
+  
+  // 鼠标滚轮缩放
+  function handleWheel(e) {
+    e.preventDefault();
+    const zoomIntensity = 0.1;
+    const mouseX = e.clientX - document.getElementById('modalImage').getBoundingClientRect().left;
+    const mouseY = e.clientY - document.getElementById('modalImage').getBoundingClientRect().top;
+    
+    const zoom = e.deltaY > 0 ? 1 - zoomIntensity : 1 + zoomIntensity;
+    
+    // 计算缩放中心
+    const newScale = Math.max(0.1, Math.min(5, scale * zoom));
+    const scaleFactor = newScale / scale;
+    
+    // 调整位移以保持鼠标位置不变
+    translateX = (mouseX - (mouseX - translateX) * scaleFactor);
+    translateY = (mouseY - (mouseY - translateY) * scaleFactor);
+    
+    scale = newScale;
+    updateImageTransform();
+  }
+  
+  // 触摸事件 - 开始
+  function touchStart(e) {
+    if (e.touches.length === 1) {
+      // 单指拖动
+      startX = e.touches[0].clientX - translateX;
+      startY = e.touches[0].clientY - translateY;
+    } else if (e.touches.length === 2) {
+      // 双指缩放
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      startDistance = distance;
+      startScale = scale;
+    }
+  }
+  
+  // 触摸事件 - 移动
+  function touchMove(e) {
+    e.preventDefault();
+    
+    if (e.touches.length === 1) {
+      // 单指拖动
+      if (scale === 1) return;
+      translateX = e.touches[0].clientX - startX;
+      translateY = e.touches[0].clientY - startY;
+      updateImageTransform();
+    } else if (e.touches.length === 2) {
+      // 双指缩放
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      
+      const scaleFactor = distance / startDistance;
+      scale = Math.max(0.1, Math.min(5, startScale * scaleFactor));
+      updateImageTransform();
+    }
+  }
+  
+  // 触摸事件 - 结束
+  function touchEnd() {
+    // 重置触摸状态
+  }
+  
+  // 绑定事件
+  document.addEventListener('DOMContentLoaded', function() {
+    const modalImage = document.getElementById('modalImage');
+    const modal = document.getElementById('imageModal');
+    
+    // 鼠标事件
+    if (modalImage) {
+      modalImage.addEventListener('mousedown', startDrag);
+      modalImage.addEventListener('wheel', handleWheel);
+      
+      // 触摸事件
+      modalImage.addEventListener('touchstart', touchStart);
+      modalImage.addEventListener('touchmove', touchMove, { passive: false });
+      modalImage.addEventListener('touchend', touchEnd);
+    }
+    
+    // 点击模态框背景关闭
+    if (modal) {
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+          closeImageModal();
+        }
+      });
+    }
+  });
+  
+  // 键盘事件
+  document.addEventListener('keydown', function(e) {
+    if (!document.getElementById('imageModal').classList.contains('hidden')) {
+      switch(e.key) {
+        case 'Escape':
+          closeImageModal();
+          break;
+        case 'ArrowLeft':
+          navigateImages(-1);
+          break;
+        case 'ArrowRight':
+          navigateImages(1);
+          break;
+      }
+    }
+  });
+</script>
 {{else}}
 <p class="text-red-500">物品不存在</p>
 {{/if}}
